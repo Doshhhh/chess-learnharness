@@ -1,0 +1,12 @@
+{
+  "apiVersion": 1,
+  "id": "chess",
+  "name": "Chess",
+  "version": "0.1.0",
+  "minAppVersion": "0.6.0",
+  "description": "Chess boards for lessons: positions with arrows, move-by-move playback, and tasks where you move the pieces. The teacher only names positions and moves; the plugin draws and checks them.",
+  "author": "Doshhhh",
+  "main": "main.js",
+  "backend": "backend.cjs",
+  "styles": "styles.css"
+}

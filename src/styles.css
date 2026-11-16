@@ -1,0 +1,374 @@
+/* Chess — the "Book" board: a diagram from a chess textbook.
+ * Paper board, hatched dark squares, outlined white pieces, inked arrows.
+ * The surrounding card follows the host theme tokens. */
+
+@font-face {
+  font-family: "Chess Glyphs";
+  src: url("assets/chess-glyphs.woff2") format("woff2");
+  font-display: block;
+  unicode-range: U+2654-265F;
+}
+
+.ch-root {
+  --ch-paper: #fbfaf6;
+  --ch-ink: #1a1a1a;
+  --ch-size: min(100%, 440px);
+  color: var(--foreground, #e6e6e6);
+  font-family: "Source Serif 4", Georgia, "Times New Roman", serif;
+}
+
+.ch-root *,
+.ch-root *::before,
+.ch-root *::after {
+  box-sizing: border-box;
+}
+
+.ch-boards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin: 6px 0;
+}
+
+.ch-multi .ch-card {
+  --ch-size: min(100%, 320px);
+  flex: 1 1 280px;
+  max-width: 340px;
+}
+
+.ch-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: var(--ch-size);
+  margin: 0;
+}
+
+.ch-title {
+  font-size: 14px;
+  font-style: italic;
+  color: var(--muted-foreground, #8d8d8d);
+}
+
+/* Board with a double ink frame and coordinates outside, as in a book. */
+/* The diagram sits on a sheet of paper, as in the printed book. */
+.ch-frame {
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) 16px;
+  gap: 4px 6px;
+  width: 100%;
+  padding: 12px 14px 8px 8px;
+  border-radius: 4px;
+  background: var(--ch-paper);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+}
+
+.ch-ranks {
+  display: grid;
+  grid-template-rows: repeat(8, minmax(0, 1fr));
+  align-items: center;
+  padding: 7px 0;
+  color: #4a4a4a;
+  font-size: 11px;
+  text-align: right;
+}
+
+.ch-files {
+  grid-column: 2;
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  padding: 0 7px;
+  color: #4a4a4a;
+  font-size: 11px;
+  text-align: center;
+}
+
+.ch-board {
+  position: relative;
+  aspect-ratio: 1;
+  width: 100%;
+  container-type: inline-size;
+  border: 3px solid var(--ch-ink);
+  outline: 1px solid var(--ch-ink);
+  outline-offset: 3px;
+  margin: 4px;
+  width: calc(100% - 8px);
+  background: var(--ch-paper);
+  user-select: none;
+  touch-action: none;
+}
+
+.ch-squares {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+}
+
+.ch-sq.ch-light {
+  background: var(--ch-paper);
+}
+
+.ch-sq.ch-dark {
+  background: repeating-linear-gradient(135deg, var(--ch-paper) 0, var(--ch-paper) 2.6px, #2a2a2a 2.6px, #2a2a2a 3.4px);
+}
+
+.ch-marks,
+.ch-pieces {
+  position: absolute;
+  inset: 0;
+}
+
+.ch-mark,
+.ch-piece,
+.ch-promo {
+  position: absolute;
+  width: 12.5%;
+  height: 12.5%;
+}
+
+.ch-last {
+  background: rgba(176, 125, 16, 0.22);
+}
+
+.ch-hl {
+  box-shadow: inset 0 0 0 3px var(--ink, #b07d10);
+  background: color-mix(in srgb, var(--ink, #b07d10) 16%, transparent);
+}
+
+.ch-selected {
+  box-shadow: inset 0 0 0 3px var(--ch-ink);
+}
+
+.ch-dot::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 22%;
+  height: 22%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: var(--ch-ink);
+  opacity: 0.75;
+}
+
+.ch-capture::after {
+  content: "";
+  position: absolute;
+  inset: 6%;
+  border: 2px solid var(--ch-ink);
+  border-radius: 50%;
+}
+
+.ch-piece {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Chess Glyphs", "Segoe UI Symbol", "Noto Sans Symbols 2", serif;
+  font-size: 9.6cqw;
+  line-height: 1;
+  color: #111;
+  transition: left 0.24s ease, top 0.24s ease;
+  pointer-events: none;
+}
+
+/* A white disc behind pieces so they read on hatched squares, as in printed diagrams. */
+.ch-piece::before {
+  content: "";
+  position: absolute;
+  inset: 14%;
+  z-index: -1;
+  border-radius: 50%;
+  background: var(--ch-paper);
+}
+
+.ch-pieces {
+  z-index: 1;
+}
+
+.ch-piece.ch-no-anim {
+  transition: none;
+}
+
+.ch-piece.ch-dragging {
+  z-index: 3;
+  transition: none;
+}
+
+.ch-arrows {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.ch-interactive {
+  cursor: pointer;
+}
+
+.ch-promo {
+  z-index: 4;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  height: 25%;
+  width: 25%;
+  border: 2px solid var(--ch-ink);
+  background: var(--ch-paper);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
+.ch-piece-button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #111;
+  font-family: "Chess Glyphs", "Segoe UI Symbol", serif;
+  font-size: 7cqw;
+  cursor: pointer;
+}
+
+.ch-piece-button:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+/* Controls and move list follow the app theme. */
+.ch-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-left: 20px;
+}
+
+.ch-ctl {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--border, #434343);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--foreground, #e6e6e6);
+  cursor: pointer;
+}
+
+.ch-ctl:hover:not(:disabled) {
+  background: var(--accent, #2a2a2a);
+}
+
+.ch-ctl:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.ch-position {
+  margin-left: 8px;
+  color: var(--muted-foreground, #8d8d8d);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ch-moves {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 6px;
+  padding-left: 20px;
+  font-size: 14px;
+}
+
+.ch-moves:empty {
+  display: none;
+}
+
+.ch-move {
+  padding: 1px 4px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--foreground, #e6e6e6);
+  font: inherit;
+  cursor: pointer;
+}
+
+.ch-move.ch-static {
+  cursor: default;
+}
+
+.ch-move:hover:not(.ch-static) {
+  background: var(--accent, #2a2a2a);
+}
+
+.ch-move.ch-on {
+  background: var(--foreground, #e6e6e6);
+  color: var(--background, #141414);
+}
+
+.ch-move.ch-has-comment::after {
+  content: "*";
+  margin-left: 1px;
+  color: var(--muted-foreground, #8d8d8d);
+}
+
+.ch-comment {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 14.5px;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.ch-status {
+  padding-left: 20px;
+  color: var(--muted-foreground, #8d8d8d);
+  font-size: 13px;
+}
+
+.ch-actions {
+  display: flex;
+  gap: 14px;
+  padding-left: 20px;
+}
+
+.ch-text-btn {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--foreground, #e6e6e6);
+  font: 13px "Inter", "Segoe UI", system-ui, sans-serif;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.ch-text-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.ch-verdict {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin-top: 8px;
+  padding-left: 20px;
+  font-size: 14px;
+}
+
+.ch-good strong {
+  color: var(--lh-success, #22c55e);
+}
+
+.ch-bad strong {
+  color: var(--lh-warning, #f59e0b);
+}
+
+.ch-note {
+  margin: 4px 0;
+  color: var(--muted-foreground, #8d8d8d);
+  font-size: 13px;
+}
